@@ -81,6 +81,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold mb-4">Your Items</h2>
+            {/* یہاں ٹائپ سکرپٹ کا ایرر ٹھیک کر دیا گیا ہے */}
             {cart.map((item: any) => (
               <div key={item._id} className="flex items-center gap-4 border-b py-4">
                 <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
