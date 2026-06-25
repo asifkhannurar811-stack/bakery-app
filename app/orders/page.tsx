@@ -15,7 +15,7 @@ export default function MyOrders() {
         const { data } = await supabase
           .from('orders')
           .select('*')
-          .eq('user_id', user.id) // صرف اسی یوزر کے آرڈرز لائیں
+          .eq('user_id', user.id) 
           .order('created_at', { ascending: false });
         
         if (data) setOrders(data);
@@ -27,7 +27,6 @@ export default function MyOrders() {
     }
   }, [user]);
 
-  // اگر یوزر لاگ ان نہیں ہے
   if (!user) {
     return (
       <div className="min-h-screen bg-amber-50/50 flex flex-col items-center justify-center">
@@ -37,7 +36,6 @@ export default function MyOrders() {
     );
   }
 
-  // اگر لوڈ ہو رہا ہو
   if (loading) {
     return <div className="min-h-screen bg-amber-50/50 flex items-center justify-center"><p>Loading orders...</p></div>;
   }
@@ -61,7 +59,6 @@ export default function MyOrders() {
                     <h3 className="font-bold text-stone-800">Order ID: {order.id.substring(0, 8)}</h3>
                     <p className="text-xs text-stone-500">Placed on: {new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
-                  {/* یہاں آرڈر کی صورتحال (Status) دکھائی جا رہی ہے */}
                   <span className={`text-sm font-semibold px-4 py-2 rounded-full 
                     ${order.status === 'Pending' ? 'bg-amber-100 text-amber-800' : 
                       order.status === 'Preparing' ? 'bg-blue-100 text-blue-800' :

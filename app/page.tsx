@@ -105,7 +105,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* پروفیشنل سلائیڈر سیکشن (اونچائی کم کر دی گئی ہے) */}
       <section className="relative w-full h-[220px] md:h-[320px] overflow-hidden shadow-md">
         <div 
           className="flex h-full transition-transform duration-700 ease-out"
@@ -142,7 +141,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* سرچ بار */}
       <section className="container mx-auto px-6 md:px-12 -mt-6 relative z-30">
         <div className="max-w-2xl mx-auto relative">
           <input 
@@ -156,7 +154,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* سروسز سیکشن */}
       <section className="bg-white py-8 mt-8 border-y border-stone-100">
         <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="flex items-center gap-4">
@@ -174,7 +171,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* کیٹگریز */}
       <section className="sticky top-[65px] z-30 bg-orange-50/95 backdrop-blur-sm border-b border-stone-100 py-4">
         <div className="container mx-auto px-6 md:px-12">
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -191,7 +187,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* پروڈکٹس */}
       <section className="container mx-auto px-6 md:px-12 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredProducts.length > 0 ? (
