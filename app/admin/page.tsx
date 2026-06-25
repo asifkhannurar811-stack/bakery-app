@@ -3,6 +3,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
+  // پاس ورڈ پروٹیکشن
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const ADMIN_PASSWORD = 'bakery123'; // اپنا پاس ورڈ یہاں لکھ دیں
+
   const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState<any[]>([]);
   const [productForm, setProductForm] = useState({ name: '', price: '', category: 'Bakery', description: '', imageUrl: '' });
@@ -16,6 +21,36 @@ export default function AdminDashboard() {
   });
   const [loadingSettings, setLoadingSettings] = useState(false);
 
+  useEffect(() => {
+    const auth = sessionStorage.getItem('isAdminAuth');
+    if (auth === 'true') setIsAdmin(true);
+
+    fetchOrders();
+    fetchSettings();
+
+    // لائیو اپ ڈیٹس کا بہتر سسٹم
+    const channel = supabase
+      .channel('admin-realtime-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        fetchOrders(); // جیسے ہی کوئی تبدیلی ہو، فوراً آرڈرز ریفریش کر دو
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAdmin(true);
+      sessionStorage.setItem('isAdminAuth', 'true');
+    } else {
+      alert('Wrong Password!');
+    }
+  };
+
   const fetchOrders = async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     if (data) setOrders(data);
@@ -26,28 +61,16 @@ export default function AdminDashboard() {
     if (data) setSettingsForm(data);
   };
 
-  useEffect(() => {
-    fetchOrders();
-    fetchSettings();
-
-    const channel = supabase
-      .channel('admin-channel')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
-        setOrders((prevOrders) => [payload.new, ...prevOrders]);
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
-        setOrders((prevOrders) => prevOrders.map((o) => o.id === payload.new.id ? payload.new : o));
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    // فوراً UI میں بدل دو
+    setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+    
+    // ڈیٹا بیس میں محفوظ کرو
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
-    if (error) alert('Error updating status: ' + error.message);
+    if (error) {
+      alert('Error updating status: ' + error.message);
+      fetchOrders(); 
+    }
   };
 
   const handleProductSubmit = async (e: React.FormEvent) => {
@@ -100,6 +123,30 @@ export default function AdminDashboard() {
     { urlKey: 'hero_image_url_3', offerKey: 'hero_offer_text_3', num: 3 }
   ];
 
+  // پاس ورڈ والا سکرین
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-stone-900 flex items-center justify-center p-4">
+        <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full">
+          <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">Admin Login</h2>
+          <input 
+            type="password" 
+            required 
+            value={passwordInput} 
+            onChange={(e) => setPasswordInput(e.target.value)} 
+            className="w-full p-3 border border-stone-300 rounded-xl mb-4 text-stone-900" 
+            placeholder="Enter Admin Password" 
+          />
+          <button type="submit" className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 cursor-pointer">
+            Login
+          </button>
+          <p className="text-xs text-stone-400 mt-4 text-center">Default password: bakery123</p>
+        </form>
+      </div>
+    );
+  }
+
+  // ڈیش بورڈ
   return (
     <div className="min-h-screen bg-stone-100 flex">
       <aside className="w-64 bg-stone-900 text-white p-6 hidden md:block">
@@ -108,12 +155,13 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('orders')} className={`cursor-pointer block w-full text-left py-2 px-4 rounded-lg ${activeTab === 'orders' ? 'bg-amber-500 text-stone-900' : 'hover:bg-stone-800'}`}>📦 Orders Management</button>
           <button onClick={() => setActiveTab('products')} className={`cursor-pointer block w-full text-left py-2 px-4 rounded-lg ${activeTab === 'products' ? 'bg-amber-500 text-stone-900' : 'hover:bg-stone-800'}`}>🍰 Product Management</button>
           <button onClick={() => setActiveTab('settings')} className={`cursor-pointer block w-full text-left py-2 px-4 rounded-lg ${activeTab === 'settings' ? 'bg-amber-500 text-stone-900' : 'hover:bg-stone-800'}`}>⚙️ Website Settings</button>
+          <button onClick={() => { sessionStorage.removeItem('isAdminAuth'); setIsAdmin(false); }} className="cursor-pointer block w-full text-left py-2 px-4 rounded-lg text-red-400 hover:bg-stone-800 mt-10">🚪 Logout</button>
         </nav>
       </aside>
 
-      <main className="flex-grow p-8">
+      <main className="flex-grow p-4 md:p-8">
         {activeTab === 'orders' ? (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+          <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold text-stone-800 mb-4">Customer Orders (Live)</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
