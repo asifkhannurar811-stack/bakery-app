@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('orders');
-  const [orders, setOrders] = useState([]);
+const [orders, setOrders] = useState<any[]>([]);
   const [productForm, setProductForm] = useState({ name: '', price: '', category: 'Bakery', description: '', imageUrl: '' });
   const [bulkJson, setBulkJson] = useState('');
   

@@ -11,7 +11,7 @@ const categories = ['All', 'Bakery', 'Fast Food', 'Desserts & Snacks', 'Beverage
 export default function Home() {
   const { user } = useAuth();
   const { cart } = useCart();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   

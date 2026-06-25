@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function MyOrders() {
   const { user } = useAuth();
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
