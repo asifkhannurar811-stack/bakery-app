@@ -51,7 +51,7 @@ export default function CartPage() {
         latitude: location?.lat,
         longitude: location?.lng,
         payment_method: paymentMethod,
-        transaction_id: transactionId || null // TID محفوظ ہو رہا ہے
+        transaction_id: transactionId || null
       }
     ]);
 
@@ -81,7 +81,7 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold mb-4">Your Items</h2>
-            {cart.map((item) => (
+            {cart.map((item: any) => (
               <div key={item._id} className="flex items-center gap-4 border-b py-4">
                 <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
                 <div className="flex-grow">
@@ -120,7 +120,6 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* یہاں ایڈمن سے سیٹ کیا ہوا نمبر دکھے گا */}
               {paymentMethod !== 'COD' && (
                 <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
                   Please send Rs. {totalAmount} to our {paymentMethod} number: <span className="font-bold">{paymentMethod === 'Easypaisa' ? settings.easypaisa_number : settings.jazzcash_number}</span>. 
