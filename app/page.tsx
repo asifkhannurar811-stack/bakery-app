@@ -73,9 +73,9 @@ export default function Home() {
   });
 
   return (
-    <main className="bg-orange-50 min-h-screen">
+    <main className="bg-stone-50 min-h-screen">
       <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="text-xl md:text-2xl font-extrabold text-orange-600">Fooma Bakery</h1>
+        <h1 className="text-xl md:text-2xl font-extrabold text-orange-500">Fooma Bakery</h1>
         
         <div className="flex items-center gap-2 md:gap-4">
           <Link href="/cart" className="relative bg-orange-100 text-orange-900 font-semibold py-2 px-3 md:px-4 rounded-full hover:bg-orange-200 cursor-pointer text-sm md:text-base">
@@ -98,87 +98,78 @@ export default function Home() {
               Logout
             </button>
           ) : (
-            <Link href="/auth" className="bg-red-600 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-700 cursor-pointer text-sm md:text-base">
+            <Link href="/auth" className="bg-red-500 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-600 cursor-pointer text-sm md:text-base">
               Login
             </Link>
           )}
         </div>
       </header>
 
-      <section className="relative w-full h-[200px] md:h-[320px] overflow-hidden shadow-md">
-        <div 
-          className="flex h-full transition-transform duration-700 ease-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {slides.map((slide, index) => (
-            <div key={index} className="relative w-full h-full flex-shrink-0">
-              <img src={slide.img} alt="Food Offer" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent"></div>
-              
-              <div className="absolute bottom-4 md:bottom-6 left-4 md:left-12 right-4 z-10 text-white max-w-xl">
-                <span className="inline-block bg-red-600 text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full mb-2 md:mb-3 uppercase tracking-wide">
-                  Fooma Special
-                </span>
-                <h2 className="text-xl md:text-4xl font-extrabold mb-2 md:mb-3 leading-tight drop-shadow-lg">
+      {/* Hero Section (Fooma Style) */}
+      <section className="bg-white py-8 md:py-12 overflow-hidden">
+        <div className="container mx-auto px-4 md:px-12 flex flex-col md:flex-row items-center">
+          <div className="md:w-1/2 text-center md:text-left z-10 w-full">
+            <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wider mb-2">Tasty Food Tasty Life</h2>
+            <div className="h-[100px] overflow-hidden relative">
+              {slides.map((slide, index) => (
+                <h1 key={index} className={`text-2xl md:text-4xl font-extrabold text-stone-800 mb-4 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>
                   {slide.offer}
-                </h2>
-                <button className="bg-white text-red-600 font-bold py-1.5 px-4 md:py-2 md:px-6 rounded-full shadow-lg hover:bg-orange-50 transition cursor-pointer text-xs md:text-sm">
-                  Order Now
-                </button>
-              </div>
+                </h1>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div className="absolute bottom-3 md:bottom-4 right-4 md:right-12 flex gap-2 z-20">
-          {slides.map((_, index) => (
-            <button 
-              key={index} 
-              onClick={() => setCurrentSlide(index)}
-              className={`h-2 rounded-full transition-all cursor-pointer ${currentSlide === index ? 'bg-white w-6 md:w-8' : 'bg-white/50 w-2'}`}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="container mx-auto px-4 md:px-12 -mt-6 relative z-30">
-        <div className="max-w-2xl mx-auto relative">
-          <input 
-            type="text" 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for cakes, shawarma..." 
-            className="w-full py-3 px-5 pr-12 rounded-full text-stone-800 shadow-xl border border-stone-100 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" 
-          />
-          <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-2 md:p-3 rounded-full text-white cursor-pointer hover:bg-orange-600">🔍</button>
-        </div>
-      </section>
-
-      <section className="bg-white py-8 mt-8 border-y border-stone-100">
-        <div className="container mx-auto px-4 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-4 rounded-full"><span className="text-2xl">🛵</span></div>
-            <div><h3 className="font-bold text-stone-800">Quick Delivery</h3><p className="text-sm text-stone-500">Fast & safe delivery</p></div>
+            <p className="text-stone-500 mb-6 max-w-md mx-auto md:mx-0 text-sm md:text-base">
+              Freshly baked goods, savory snacks, and your daily groceries delivered to your doorstep.
+            </p>
+            <div className="max-w-md mx-auto md:mx-0 relative">
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for cakes, shawarma..." 
+                className="w-full py-3 px-5 pr-12 rounded-full text-stone-800 border border-stone-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" 
+              />
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-2 rounded-full text-white cursor-pointer">🔍</button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-4 rounded-full"><span className="text-2xl">🍽️</span></div>
-            <div><h3 className="font-bold text-stone-800">Super Dine In</h3><p className="text-sm text-stone-500">Hygienic & comfortable</p></div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="bg-orange-100 p-4 rounded-full"><span className="text-2xl">🛍️</span></div>
-            <div><h3 className="font-bold text-stone-800">Easy Pick Up</h3><p className="text-sm text-stone-500">Grab your order easily</p></div>
+          
+          <div className="md:w-1/2 mt-8 md:mt-0 flex justify-center relative w-full">
+            {slides.map((slide, index) => (
+              <div key={index} className={`transition-opacity duration-500 ${index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'}`}>
+                <img src={slide.img} alt="Food Offer" className="rounded-3xl w-64 h-64 md:w-96 md:h-96 object-cover shadow-2xl" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="sticky top-[60px] z-30 bg-orange-50/95 backdrop-blur-sm border-b border-stone-100 py-4">
+      {/* Services Section */}
+      <section className="bg-white py-6 border-t border-stone-100">
+        <div className="container mx-auto px-4 md:px-12 grid grid-cols-3 gap-2 md:gap-8 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🛵</span></div>
+            <h3 className="font-bold text-xs md:text-base text-stone-800">Quick Delivery</h3>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🍽️</span></div>
+            <h3 className="font-bold text-xs md:text-base text-stone-800">Super Dine In</h3>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🛍️</span></div>
+            <h3 className="font-bold text-xs md:text-base text-stone-800">Easy Pick Up</h3>
+          </div>
+        </div>
+      </section>
+
+      {/* Favourites / Categories */}
+      <section className="py-6">
         <div className="container mx-auto px-4 md:px-12">
+          <h2 className="text-xl font-bold text-stone-800 mb-4">Favourites</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((cat) => (
               <button 
                 key={cat} 
                 onClick={() => setActiveCategory(cat)} 
-                className={`cursor-pointer whitespace-nowrap px-4 py-2 rounded-full font-semibold shadow-sm transition text-sm ${activeCategory === cat ? 'bg-red-600 text-white' : 'bg-white text-stone-600 hover:bg-stone-100'}`}
+                className={`cursor-pointer whitespace-nowrap px-5 py-2 rounded-full font-semibold shadow-sm transition text-sm ${activeCategory === cat ? 'bg-red-500 text-white' : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'}`}
               >
                 {cat}
               </button>
@@ -187,9 +178,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* یہاں موبائل کے لیے 2 پروڈکٹس اور لیپ ٹاپ کے لیے 4 کا گرڈ بنایا گیا ہے */}
-      <section className="container mx-auto px-4 md:px-12 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+      {/* Product List (موبائل پر 1 اور لیپ ٹاپ پر 3 کا گرڈ) */}
+      <section className="container mx-auto px-4 md:px-12 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredProducts.length > 0 ? (
             filteredProducts.map((product: any) => (
               <ProductCard key={product.id} product={{
@@ -203,7 +194,7 @@ export default function Home() {
               }} />
             ))
           ) : (
-            <p className="text-stone-500">No products found.</p>
+            <p className="text-stone-500 text-center py-8">No products found.</p>
           )}
         </div>
       </section>
