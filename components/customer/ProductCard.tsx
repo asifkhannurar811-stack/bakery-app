@@ -8,15 +8,14 @@ export default function ProductCard({ product }: { product: any }) {
 
   return (
     <>
-      {/* پروفیشنل اور صاف ستھرا کارڈ */}
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-stone-100 group">
         
-        {/* تصویر */}
-        <div className="relative w-full h-36 md:h-48 bg-stone-50 overflow-hidden cursor-pointer" onClick={() => setIsModalOpen(true)}>
+        {/* تصویر (object-contain استعمال کیا گیا ہے تاکہ زوم نہ ہو) */}
+        <div className="relative w-full h-36 md:h-48 bg-stone-50 overflow-hidden cursor-pointer p-2" onClick={() => setIsModalOpen(true)}>
           <img 
             src={product.imageUrl} 
             alt={product.name} 
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
             loading="lazy" 
           />
           {!product.isAvailable && (
@@ -26,7 +25,6 @@ export default function ProductCard({ product }: { product: any }) {
           )}
         </div>
 
-        {/* تفصیل */}
         <div className="p-3 md:p-4 flex flex-col flex-grow">
           <h3 
             className="font-bold text-sm md:text-base text-stone-800 line-clamp-1 cursor-pointer hover:text-orange-600 transition" 
@@ -50,12 +48,11 @@ export default function ProductCard({ product }: { product: any }) {
         </div>
       </div>
 
-      {/* پاپ اپ (ماڈل) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIsModalOpen(false)}>
-          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-            <div className="relative w-full h-64 bg-stone-50">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="relative w-full h-64 bg-stone-50 p-4">
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
               <button onClick={() => setIsModalOpen(false)} className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600">✕</button>
             </div>
             <div className="p-6">

@@ -22,6 +22,21 @@ export default function MyOrders() {
         setLoading(false);
       }
       fetchOrders();
+
+      // لائیو اپ ڈیٹس: جب ایڈمن سٹیٹس بدلے تو یہ فوراً موبائل پر دکھے
+      const channel = supabase
+        .channel('orders-realtime-channel')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
+          // صرف اسی یوزر کے آرڈرز اپ ڈیٹ کرو
+          if (payload.new.user_id === user.id) {
+            setOrders((prev) => prev.map((o) => o.id === payload.new.id ? payload.new : o));
+          }
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } else {
       setLoading(false);
     }
@@ -29,21 +44,21 @@ export default function MyOrders() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-amber-50/50 flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-bold text-stone-800">Please login to view your orders</h2>
-        <Link href="/auth" className="mt-4 bg-red-600 text-white font-semibold py-2 px-6 rounded-full hover:bg-red-700">Login</Link>
+      <div className="min-h-screen bg-stone-100 flex flex-col items-center justify-center p-4">
+        <h2 className="text-2xl font-bold text-stone-800 mb-4">Please login to view your orders</h2>
+        <Link href="/auth" className="bg-red-600 text-white font-semibold py-2 px-6 rounded-full hover:bg-red-700">Login</Link>
       </div>
     );
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-amber-50/50 flex items-center justify-center"><p>Loading orders...</p></div>;
+    return <div className="min-h-screen bg-stone-100 flex items-center justify-center"><p>Loading orders...</p></div>;
   }
 
   return (
-    <div className="min-h-screen bg-amber-50/50 py-12">
-      <div className="container mx-auto px-6 md:px-12 max-w-4xl">
-        <h1 className="text-3xl font-bold text-stone-800 mb-8">My Orders</h1>
+    <div className="min-h-screen bg-stone-100 py-12">
+      <div className="container mx-auto px-4 md:px-12 max-w-3xl">
+        <h1 className="text-2xl md:text-3xl font-bold text-stone-800 mb-8">My Orders</h1>
         
         {orders.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 text-center">
@@ -59,7 +74,8 @@ export default function MyOrders() {
                     <h3 className="font-bold text-stone-800">Order ID: {order.id.substring(0, 8)}</h3>
                     <p className="text-xs text-stone-500">Placed on: {new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
-                  <span className={`text-sm font-semibold px-4 py-2 rounded-full 
+                  {/* یہاں سٹیٹس لائیو اپ ڈیٹ ہوگا */}
+                  <span className={`text-xs font-semibold px-4 py-2 rounded-full 
                     ${order.status === 'Pending' ? 'bg-amber-100 text-amber-800' : 
                       order.status === 'Preparing' ? 'bg-blue-100 text-blue-800' :
                       order.status === 'Out for Delivery' ? 'bg-purple-100 text-purple-800' :
