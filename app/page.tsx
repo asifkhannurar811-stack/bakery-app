@@ -14,14 +14,17 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true); // لوڈنگ کا سسٹم
   
   const [settings, setSettings] = useState<any>({});
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     async function fetchProducts() {
+      setLoading(true);
       const { data } = await supabase.from('products').select('*');
       if (data) setProducts(data);
+      setLoading(false);
     }
     fetchProducts();
 
@@ -105,12 +108,14 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section (Fooma Style) */}
+      {/* Hero Section: بائیں ٹیکسٹ، دائیں تصویر */}
       <section className="bg-white py-8 md:py-12 overflow-hidden">
         <div className="container mx-auto px-4 md:px-12 flex flex-col md:flex-row items-center">
-          <div className="md:w-1/2 text-center md:text-left z-10 w-full">
+          
+          {/* بائیں جانب ٹیکسٹ */}
+          <div className="md:w-1/2 text-center md:text-left z-10 w-full order-2 md:order-1">
             <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wider mb-2">Tasty Food Tasty Life</h2>
-            <div className="h-[100px] overflow-hidden relative">
+            <div className="h-[80px] overflow-hidden relative">
               {slides.map((slide, index) => (
                 <h1 key={index} className={`text-2xl md:text-4xl font-extrabold text-stone-800 mb-4 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>
                   {slide.offer}
@@ -132,17 +137,17 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="md:w-1/2 mt-8 md:mt-0 flex justify-center relative w-full">
+          {/* دائیں جانب تصویر (مکمل دکھنے والی) */}
+          <div className="md:w-1/2 mt-8 md:mt-0 flex justify-center relative w-full order-1 md:order-2 mb-4 md:mb-0">
             {slides.map((slide, index) => (
               <div key={index} className={`transition-opacity duration-500 ${index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'}`}>
-                <img src={slide.img} alt="Food Offer" className="rounded-3xl w-64 h-64 md:w-96 md:h-96 object-cover shadow-2xl" />
+                <img src={slide.img} alt="Food Offer" className="rounded-3xl w-full h-auto max-h-[400px] object-contain shadow-2xl" loading="lazy" />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
       <section className="bg-white py-6 border-t border-stone-100">
         <div className="container mx-auto px-4 md:px-12 grid grid-cols-3 gap-2 md:gap-8 text-center">
           <div className="flex flex-col items-center gap-2">
@@ -160,7 +165,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Favourites / Categories */}
       <section className="py-6">
         <div className="container mx-auto px-4 md:px-12">
           <h2 className="text-xl font-bold text-stone-800 mb-4">Favourites</h2>
@@ -178,25 +182,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Product List (موبائل پر 1 اور لیپ ٹاپ پر 3 کا گرڈ) */}
+      {/* Product Grid: موبائل پر 5 پروڈکٹس ایک رow میں */}
       <section className="container mx-auto px-4 md:px-12 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product: any) => (
-              <ProductCard key={product.id} product={{
-                _id: product.id,
-                name: product.name,
-                description: product.description,
-                price: product.price,
-                category: product.category,
-                imageUrl: product.image_url,
-                isAvailable: product.is_available
-              }} />
-            ))
-          ) : (
-            <p className="text-stone-500 text-center py-8">No products found.</p>
-          )}
-        </div>
+        {loading ? (
+          <p className="text-center text-stone-500 py-8">Loading products...</p>
+        ) : (
+          <div className="grid grid-cols-5 md:grid-cols-6 gap-2 md:gap-4">
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product: any) => (
+                <ProductCard key={product.id} product={{
+                  _id: product.id,
+                  name: product.name,
+                  description: product.description,
+                  price: product.price,
+                  category: product.category,
+                  imageUrl: product.image_url,
+                  isAvailable: product.is_available
+                }} />
+              ))
+            ) : (
+              <p className="text-stone-500 text-center py-8 col-span-5">No products found.</p>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );

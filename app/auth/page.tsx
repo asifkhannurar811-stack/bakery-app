@@ -17,17 +17,22 @@ export default function AuthPage() {
     setError('');
 
     if (isLogin) {
-      // Login کا کا
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // Login
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setError(error.message);
-      else router.push('/'); // کامیابی پر ہوم پیج پر بھیجیں
+      else router.push('/'); 
     } else {
-      // Signup کا کا
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setError(error.message);
-      else {
-        alert('Signup successful! Please login now.');
-        setIsLogin(true);
+      // Signup
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        setError(error.message);
+      } else if (data.user && !data.session) {
+        // اگر ای میل کنفرمیشن آن ہو تو یہ میسج دکھائیں
+        alert('Signup successful! A verification code/link has been sent to your email. Please verify and then login.');
+        setIsLogin(true); // اب لاگ اِن والے پیج پر لے جائیں
+      } else if (data.session) {
+        // اگر ای میل کنفرمیشن آف ہو تو سیدھا لاگ اِن کر دیں
+        router.push('/');
       }
     }
     setLoading(false);
@@ -50,7 +55,7 @@ export default function AuthPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full p-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 text-stone-900"
               placeholder="your@email.com"
             />
           </div>
@@ -61,14 +66,14 @@ export default function AuthPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400"
+              className="w-full p-3 border border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 text-stone-900"
               placeholder="••••••••"
             />
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+            className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
           </button>
@@ -78,7 +83,7 @@ export default function AuthPage() {
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
-            className="text-red-600 font-semibold hover:underline"
+            className="text-red-600 font-semibold hover:underline cursor-pointer"
           >
             {isLogin ? 'Sign Up' : 'Login'}
           </button>

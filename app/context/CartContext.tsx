@@ -16,7 +16,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prevCart, { ...product, quantity: 1 }];
     });
-    alert(`${product.name} added to cart!`);
+    // پاپ اپ (Alert) ہٹا دیا گیا ہے
   };
 
   const removeFromCart = (id: string) => {
