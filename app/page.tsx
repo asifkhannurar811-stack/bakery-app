@@ -6,7 +6,7 @@ import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
 import Link from 'next/link';
 
-const categories = ['All', 'Bakery', 'Fast Food', 'Desserts & Snacks', 'Beverages', 'General Store'];
+const categories = ['All', 'Bakery', 'Fast Food', 'Desserts', 'Beverages', 'Groceries'];
 
 export default function Home() {
   const { user } = useAuth();
@@ -14,7 +14,7 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true); // لوڈنگ کا سسٹم
+  const [loading, setLoading] = useState(true);
   
   const [settings, setSettings] = useState<any>({});
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -76,54 +76,60 @@ export default function Home() {
   });
 
   return (
-    <main className="bg-stone-50 min-h-screen">
-      <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
-        <h1 className="text-xl md:text-2xl font-extrabold text-orange-500">Fooma Bakery</h1>
+    <main className="bg-stone-100 min-h-screen">
+      {/* ہیڈر */}
+      <header className="bg-white shadow-sm py-4 px-4 md:px-8 flex justify-between items-center sticky top-0 z-50">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-2xl">🍰</span>
+          <h1 className="text-xl md:text-2xl font-extrabold text-orange-600">Fooma</h1>
+        </Link>
         
-        <div className="flex items-center gap-2 md:gap-4">
-          <Link href="/cart" className="relative bg-orange-100 text-orange-900 font-semibold py-2 px-3 md:px-4 rounded-full hover:bg-orange-200 cursor-pointer text-sm md:text-base">
-            🛒 Cart
+        <div className="flex items-center gap-3">
+          <Link href="/cart" className="relative p-2 md:bg-orange-50 md:text-orange-900 md:py-2 md:px-4 rounded-full hover:bg-orange-100 cursor-pointer transition">
+            <span className="text-xl md:text-sm md:font-semibold">🛒 <span className="hidden md:inline">Cart</span></span>
             {cart.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
                 {cart.length}
               </span>
             )}
           </Link>
 
           {user && (
-            <Link href="/orders" className="bg-blue-100 text-blue-900 font-semibold py-2 px-3 md:px-4 rounded-full hover:bg-blue-200 hidden sm:block cursor-pointer text-sm md:text-base">
-              My Orders
+            <Link href="/orders" className="p-2 md:bg-blue-50 md:text-blue-900 md:py-2 md:px-4 rounded-full hover:bg-blue-100 hidden sm:block cursor-pointer transition text-sm font-semibold">
+              📦 <span className="hidden md:inline">Orders</span>
             </Link>
           )}
 
           {user ? (
-            <button onClick={() => supabase.auth.signOut()} className="bg-stone-800 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-stone-700 cursor-pointer text-sm md:text-base">
+            <button onClick={() => supabase.auth.signOut()} className="bg-stone-800 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-stone-900 cursor-pointer transition text-sm">
               Logout
             </button>
           ) : (
-            <Link href="/auth" className="bg-red-500 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-600 cursor-pointer text-sm md:text-base">
+            <Link href="/auth" className="bg-red-600 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-700 cursor-pointer transition text-sm">
               Login
             </Link>
           )}
         </div>
       </header>
 
-      {/* Hero Section: بائیں ٹیکسٹ، دائیں تصویر */}
+      {/* ہیرو سیکشن */}
       <section className="bg-white py-8 md:py-12 overflow-hidden">
-        <div className="container mx-auto px-4 md:px-12 flex flex-col md:flex-row items-center">
+        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center gap-8">
           
           {/* بائیں جانب ٹیکسٹ */}
-          <div className="md:w-1/2 text-center md:text-left z-10 w-full order-2 md:order-1">
-            <h2 className="text-sm font-bold text-orange-500 uppercase tracking-wider mb-2">Tasty Food Tasty Life</h2>
+          <div className="md:w-1/2 text-center md:text-left z-10 w-full">
+            <span className="inline-block bg-orange-100 text-orange-700 text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wide">
+              Tasty Food Tasty Life
+            </span>
             <div className="h-[80px] overflow-hidden relative">
               {slides.map((slide, index) => (
-                <h1 key={index} className={`text-2xl md:text-4xl font-extrabold text-stone-800 mb-4 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>
+                <h1 key={index} className={`text-3xl md:text-5xl font-extrabold text-stone-900 mb-4 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>
                   {slide.offer}
                 </h1>
               ))}
             </div>
             <p className="text-stone-500 mb-6 max-w-md mx-auto md:mx-0 text-sm md:text-base">
-              Freshly baked goods, savory snacks, and your daily groceries delivered to your doorstep.
+              Freshly baked goods, savory snacks, and your daily groceries delivered fast to your doorstep.
             </p>
             <div className="max-w-md mx-auto md:mx-0 relative">
               <input 
@@ -131,49 +137,35 @@ export default function Home() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for cakes, shawarma..." 
-                className="w-full py-3 px-5 pr-12 rounded-full text-stone-800 border border-stone-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm" 
+                className="w-full py-3.5 px-5 pr-14 rounded-full text-stone-800 border border-stone-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm" 
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-2 rounded-full text-white cursor-pointer">🔍</button>
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-2.5 rounded-full text-white cursor-pointer hover:bg-orange-600 transition">🔍</button>
             </div>
           </div>
           
-          {/* دائیں جانب تصویر (مکمل دکھنے والی) */}
-          <div className="md:w-1/2 mt-8 md:mt-0 flex justify-center relative w-full order-1 md:order-2 mb-4 md:mb-0">
-            {slides.map((slide, index) => (
-              <div key={index} className={`transition-opacity duration-500 ${index === currentSlide ? 'opacity-100' : 'opacity-0 absolute'}`}>
-                <img src={slide.img} alt="Food Offer" className="rounded-3xl w-full h-auto max-h-[400px] object-contain shadow-2xl" loading="lazy" />
-              </div>
-            ))}
+          {/* دائیں جانب تصویر */}
+          <div className="md:w-1/2 mt-4 md:mt-0 flex justify-center relative w-full">
+            <div className="relative w-full max-w-md aspect-square">
+              {slides.map((slide, index) => (
+                <div key={index} className={`transition-opacity duration-700 absolute inset-0 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
+                  <img src={slide.img} alt="Food Offer" className="w-full h-full object-cover rounded-3xl shadow-xl" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white py-6 border-t border-stone-100">
-        <div className="container mx-auto px-4 md:px-12 grid grid-cols-3 gap-2 md:gap-8 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🛵</span></div>
-            <h3 className="font-bold text-xs md:text-base text-stone-800">Quick Delivery</h3>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🍽️</span></div>
-            <h3 className="font-bold text-xs md:text-base text-stone-800">Super Dine In</h3>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="bg-orange-100 p-3 rounded-full"><span className="text-xl md:text-2xl">🛍️</span></div>
-            <h3 className="font-bold text-xs md:text-base text-stone-800">Easy Pick Up</h3>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-6">
-        <div className="container mx-auto px-4 md:px-12">
-          <h2 className="text-xl font-bold text-stone-800 mb-4">Favourites</h2>
+      {/* کیٹگریز والا حصہ */}
+      <section className="py-6 bg-stone-100">
+        <div className="container mx-auto px-4 md:px-8">
+          <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">Categories</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((cat) => (
               <button 
                 key={cat} 
                 onClick={() => setActiveCategory(cat)} 
-                className={`cursor-pointer whitespace-nowrap px-5 py-2 rounded-full font-semibold shadow-sm transition text-sm ${activeCategory === cat ? 'bg-red-500 text-white' : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'}`}
+                className={`cursor-pointer whitespace-nowrap px-5 py-2.5 rounded-full font-medium shadow-sm transition text-sm ${activeCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-200'}`}
               >
                 {cat}
               </button>
@@ -182,12 +174,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Product Grid: موبائل پر 5 پروڈکٹس ایک رow میں */}
-      <section className="container mx-auto px-4 md:px-12 pb-12">
+      {/* پروڈکٹس کا گرڈ: موبائل پر 2 اور لیپ ٹاپ پر 4 */}
+      <section className="container mx-auto px-4 md:px-8 pb-12">
+        <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">
+          {activeCategory === 'All' ? 'All Products' : activeCategory}
+        </h2>
+        
         {loading ? (
-          <p className="text-center text-stone-500 py-8">Loading products...</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="bg-white rounded-2xl h-64 animate-pulse"></div>
+            ))}
+          </div>
         ) : (
-          <div className="grid grid-cols-5 md:grid-cols-6 gap-2 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product: any) => (
                 <ProductCard key={product.id} product={{
@@ -201,7 +201,7 @@ export default function Home() {
                 }} />
               ))
             ) : (
-              <p className="text-stone-500 text-center py-8 col-span-5">No products found.</p>
+              <p className="text-stone-500 text-center py-8 col-span-full">No products found.</p>
             )}
           </div>
         )}

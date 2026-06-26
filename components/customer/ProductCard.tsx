@@ -8,50 +8,65 @@ export default function ProductCard({ product }: { product: any }) {
 
   return (
     <>
-      {/* موبائل پر 5 کے گرڈ کے لیے چھوٹا اور کمپیکٹ کارڈ */}
-      <div className="bg-white rounded-lg shadow-sm border border-stone-100 flex flex-col overflow-hidden h-full hover:shadow-md transition-shadow">
+      {/* پروفیشنل اور صاف ستھرا کارڈ */}
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-stone-100 group">
         
-        <div className="relative w-full h-16 md:h-32 bg-amber-50 flex-shrink-0 cursor-pointer" onClick={() => setIsModalOpen(true)}>
-          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover md:object-contain p-1" loading="lazy" />
+        {/* تصویر */}
+        <div className="relative w-full h-36 md:h-48 bg-stone-50 overflow-hidden cursor-pointer" onClick={() => setIsModalOpen(true)}>
+          <img 
+            src={product.imageUrl} 
+            alt={product.name} 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+            loading="lazy" 
+          />
           {!product.isAvailable && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white font-bold text-[8px] md:text-xs bg-red-600 px-1 rounded-full">Out</span>
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <span className="text-white font-bold text-xs md:text-sm bg-red-600 px-3 py-1 rounded-full">Out of Stock</span>
             </div>
           )}
         </div>
 
-        <div className="p-1 md:p-2 flex flex-col flex-grow">
-          <h3 className="font-bold text-[8px] md:text-sm text-stone-800 truncate cursor-pointer" onClick={() => setIsModalOpen(true)}>{product.name}</h3>
+        {/* تفصیل */}
+        <div className="p-3 md:p-4 flex flex-col flex-grow">
+          <h3 
+            className="font-bold text-sm md:text-base text-stone-800 line-clamp-1 cursor-pointer hover:text-orange-600 transition" 
+            onClick={() => setIsModalOpen(true)}
+          >
+            {product.name}
+          </h3>
+          <p className="text-xs text-stone-400 mt-0.5 flex-grow line-clamp-2">{product.description}</p>
           
-          <div className="mt-1 flex items-center justify-between gap-1">
-            <span className="text-[10px] md:text-base font-extrabold text-red-500">Rs.{product.price}</span>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <span className="text-base md:text-lg font-extrabold text-stone-900">Rs {product.price}</span>
           </div>
           
           <button 
             disabled={!product.isAvailable}
             onClick={() => addToCart(product)}
-            className="mt-1 md:mt-2 w-full py-0.5 md:py-1.5 text-[8px] md:text-sm font-semibold text-white bg-red-500 rounded-md md:rounded-xl hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="mt-3 w-full py-2 text-xs md:text-sm font-semibold text-white bg-stone-900 rounded-xl hover:bg-orange-600 transition disabled:bg-stone-300 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1"
           >
-            Add +
+            Add to Cart <span>+</span>
           </button>
         </div>
       </div>
 
+      {/* پاپ اپ (ماڈل) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setIsModalOpen(false)}>
-          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="w-full h-64 bg-amber-50 flex items-center justify-center">
-              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain p-4" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIsModalOpen(false)}>
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="relative w-full h-64 bg-stone-50">
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+              <button onClick={() => setIsModalOpen(false)} className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600">✕</button>
             </div>
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-stone-800">{product.name}</h2>
-              <span className="inline-block mt-2 text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-full">{product.category}</span>
-              <p className="mt-4 text-stone-600">{product.description}</p>
+              <span className="inline-block text-xs font-bold text-orange-700 bg-orange-100 px-3 py-1 rounded-full mb-3">{product.category}</span>
+              <h2 className="text-2xl font-bold text-stone-900">{product.name}</h2>
+              <p className="mt-2 text-stone-500 text-sm">{product.description}</p>
               <div className="mt-6 flex justify-between items-center">
-                <span className="text-2xl font-extrabold text-red-500">Rs. {product.price}</span>
+                <span className="text-2xl font-extrabold text-stone-900">Rs {product.price}</span>
                 <button 
                   onClick={() => { addToCart(product); setIsModalOpen(false); }}
-                  className="py-3 px-6 font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition shadow-md cursor-pointer"
+                  className="py-3 px-8 font-semibold text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition shadow-md cursor-pointer"
                 >
                   Add to Cart
                 </button>
