@@ -28,10 +28,21 @@ export default function CartPage() {
   const getLocation = () => {
     setLocating(true);
     if (navigator.geolocation) {
+      // enableHighAccuracy: true یہ فون کو مجبور کرے گا کہ وہ GPS استعمال کرے (واٹس ایپ کی طرح)
       navigator.geolocation.getCurrentPosition(
-        (position) => { setLocation({ lat: position.coords.latitude, lng: position.coords.longitude }); setLocating(false); alert("Location captured!"); },
-        (error) => { alert("Please allow location access."); setLocating(false); }
+        (position) => { 
+          setLocation({ lat: position.coords.latitude, lng: position.coords.longitude }); 
+          setLocating(false); 
+          alert("Exact location captured successfully!"); 
+        },
+        (error) => { 
+          alert("Please allow location access and turn on GPS."); 
+          setLocating(false); 
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
+    } else {
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
@@ -66,7 +77,7 @@ export default function CartPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-orange-50 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#f7f5f2] flex flex-col items-center justify-center">
         <h2 className="text-2xl font-bold text-stone-800">Your cart is empty</h2>
         <a href="/" className="mt-4 text-red-600 font-semibold hover:underline">Go back to shopping</a>
       </div>
@@ -74,14 +85,13 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-orange-50 py-12">
-      <div className="container mx-auto px-6 md:px-12 max-w-4xl">
+    <div className="min-h-screen bg-[#f7f5f2] py-12">
+      <div className="container mx-auto px-4 md:px-12 max-w-4xl">
         <h1 className="text-3xl font-bold text-stone-800 mb-8">Checkout</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold mb-4">Your Items</h2>
-            {/* یہاں ٹائپ سکرپٹ کا ایرر ٹھیک کر دیا گیا ہے */}
             {cart.map((item: any) => (
               <div key={item._id} className="flex items-center gap-4 border-b py-4">
                 <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-lg" />
@@ -106,11 +116,11 @@ export default function CartPage() {
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold mb-4">Delivery & Payment</h2>
             <form onSubmit={handlePlaceOrder} className="space-y-4">
-              <div><label className="block text-sm font-medium text-stone-700 mb-1">Full Name</label><input type="text" required value={customerInfo.name} onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl" /></div>
-              <div><label className="block text-sm font-medium text-stone-700 mb-1">Phone Number</label><input type="tel" required value={customerInfo.phone} onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl" /></div>
-              <div><label className="block text-sm font-medium text-stone-700 mb-1">Address</label><textarea required rows={3} value={customerInfo.address} onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl"></textarea></div>
+              <div><label className="block text-sm font-medium text-stone-700 mb-1">Full Name</label><input type="text" required value={customerInfo.name} onChange={(e) => setCustomerInfo({...customerInfo, name: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" /></div>
+              <div><label className="block text-sm font-medium text-stone-700 mb-1">Phone Number</label><input type="tel" required value={customerInfo.phone} onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" /></div>
+              <div><label className="block text-sm font-medium text-stone-700 mb-1">Address</label><textarea required rows={3} value={customerInfo.address} onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900"></textarea></div>
 
-              <div><button type="button" onClick={getLocation} className={`w-full py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${location ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'}`}>{locating ? "Fetching..." : location ? "✓ Location Captured" : "📍 Share Live Location"}</button></div>
+              <div><button type="button" onClick={getLocation} className={`w-full py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${location ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'}`}>{locating ? "Fetching GPS..." : location ? "✓ Exact Location Captured" : "📍 Share Live Location (Like WhatsApp)"}</button></div>
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">Select Payment Method</label>
@@ -125,11 +135,11 @@ export default function CartPage() {
                 <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
                   Please send Rs. {totalAmount} to our {paymentMethod} number: <span className="font-bold">{paymentMethod === 'Easypaisa' ? settings.easypaisa_number : settings.jazzcash_number}</span>. 
                   <br/>Enter your Transaction ID (TID) below:
-                  <input type="text" required value={transactionId} onChange={(e) => setTransactionId(e.target.value)} className="w-full mt-2 p-2 border border-stone-300 rounded-lg" placeholder="e.g. 123456789" />
+                  <input type="text" required value={transactionId} onChange={(e) => setTransactionId(e.target.value)} className="w-full mt-2 p-2 border border-stone-300 rounded-lg text-stone-900" placeholder="e.g. 123456789" />
                 </div>
               )}
 
-              <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 disabled:opacity-50 cursor-pointer">
+              <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 disabled:opacity-50 cursor-pointer active:scale-95 transition">
                 {loading ? 'Placing Order...' : 'Place Order'}
               </button>
             </form>

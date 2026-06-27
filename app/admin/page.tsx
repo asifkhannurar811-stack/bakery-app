@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function AdminDashboard() {
-  // پاس ورڈ پروٹیکشن
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
-  const ADMIN_PASSWORD = 'bakery123'; // اپنا پاس ورڈ یہاں لکھ دیں
+  const ADMIN_PASSWORD = 'bakery123'; 
 
   const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState<any[]>([]);
   const [productForm, setProductForm] = useState({ name: '', price: '', category: 'Bakery', description: '', imageUrl: '' });
   const [bulkJson, setBulkJson] = useState('');
+  const [mapOrder, setMapOrder] = useState<any>(null); // میپ پاپ اپ کے لیے سٹیٹ
   
   const [settingsForm, setSettingsForm] = useState<any>({ 
     hero_image_url: '', hero_offer_text: '', 
@@ -28,11 +28,10 @@ export default function AdminDashboard() {
     fetchOrders();
     fetchSettings();
 
-    // لائیو اپ ڈیٹس کا بہتر سسٹم
     const channel = supabase
       .channel('admin-realtime-channel')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
-        fetchOrders(); // جیسے ہی کوئی تبدیلی ہو، فوراً آرڈرز ریفریش کر دو
+        fetchOrders(); 
       })
       .subscribe();
 
@@ -62,10 +61,7 @@ export default function AdminDashboard() {
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
-    // فوراً UI میں بدل دو
     setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
-    
-    // ڈیٹا بیس میں محفوظ کرو
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
     if (error) {
       alert('Error updating status: ' + error.message);
@@ -123,30 +119,18 @@ export default function AdminDashboard() {
     { urlKey: 'hero_image_url_3', offerKey: 'hero_offer_text_3', num: 3 }
   ];
 
-  // پاس ورڈ والا سکرین
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-stone-900 flex items-center justify-center p-4">
         <form onSubmit={handleLogin} className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full">
           <h2 className="text-2xl font-bold text-stone-800 mb-6 text-center">Admin Login</h2>
-          <input 
-            type="password" 
-            required 
-            value={passwordInput} 
-            onChange={(e) => setPasswordInput(e.target.value)} 
-            className="w-full p-3 border border-stone-300 rounded-xl mb-4 text-stone-900" 
-            placeholder="Enter Admin Password" 
-          />
-          <button type="submit" className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 cursor-pointer">
-            Login
-          </button>
-          <p className="text-xs text-stone-400 mt-4 text-center">Default password: bakery123</p>
+          <input type="password" required value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} className="w-full p-3 border border-stone-300 rounded-xl mb-4 text-stone-900" placeholder="Enter Admin Password" />
+          <button type="submit" className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 cursor-pointer">Login</button>
         </form>
       </div>
     );
   }
 
-  // ڈیش بورڈ
   return (
     <div className="min-h-screen bg-stone-100 flex">
       <aside className="w-64 bg-stone-900 text-white p-6 hidden md:block">
@@ -215,7 +199,9 @@ export default function AdminDashboard() {
                       </td>
                       <td className="py-4 px-4">
                         {order.latitude && order.longitude ? (
-                          <a href={`https://www.google.com/maps?q=${order.latitude},${order.longitude}`} target="_blank" rel="noreferrer" className="bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-blue-700 inline-block cursor-pointer">View Map 📍</a>
+                          <button onClick={() => setMapOrder(order)} className="bg-blue-600 text-white text-xs font-bold py-2 px-4 rounded-lg hover:bg-blue-700 inline-block cursor-pointer">
+                            View Map 📍
+                          </button>
                         ) : ( <span className="text-xs text-stone-400">No Location</span> )}
                       </td>
                     </tr>
@@ -277,6 +263,32 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* میپ والا پاپ اپ (Modal) */}
+      {mapOrder && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setMapOrder(null)}>
+          <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="font-bold text-lg text-stone-800">Customer Location: {mapOrder.customer_name}</h3>
+              <button onClick={() => setMapOrder(null)} className="text-stone-500 hover:text-red-600 text-xl">✕</button>
+            </div>
+            {/* یہاں گوگل میپ کا مکمل انٹرایکٹو سکرین کھلے گا */}
+            <iframe
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://www.google.com/maps?q=${mapOrder.latitude},${mapOrder.longitude}&z=18&output=embed`}>
+            </iframe>
+            <div className="p-4 flex justify-end gap-4">
+              <a href={`https://www.google.com/maps?q=${mapOrder.latitude},${mapOrder.longitude}`} target="_blank" rel="noreferrer" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 cursor-pointer">
+                Open in Google Maps App 🗺️
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
