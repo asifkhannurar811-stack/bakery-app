@@ -76,8 +76,7 @@ export default function Home() {
   });
 
   return (
-    <main className="bg-stone-100 min-h-screen">
-      {/* ہیڈر */}
+    <main className="bg-[#f7f5f2] min-h-screen"> {/* یہاں پروفیشنل کریم رنگ دیا گیا ہے */}
       <header className="bg-white shadow-sm py-4 px-4 md:px-8 flex justify-between items-center sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl">🍰</span>
@@ -94,7 +93,6 @@ export default function Home() {
             )}
           </Link>
 
-          {/* My Orders بٹن واپس لگا دیا گیا ہے */}
           {user && (
             <Link href="/orders" className="p-2 md:bg-blue-50 md:text-blue-900 md:py-2 md:px-4 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold">
               📦 <span className="hidden md:inline">Orders</span>
@@ -113,11 +111,9 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ہیرو سیکشن (موبائل پر بائیں ٹیکسٹ/سرچ، دائیں تصویر) */}
       <section className="bg-white py-6 md:py-12 overflow-hidden">
         <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 gap-4 items-center">
           
-          {/* بائیں جانب ٹیکسٹ اور سرچ */}
           <div className="text-left z-10">
             <span className="inline-block bg-orange-100 text-orange-700 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full mb-2 uppercase tracking-wide">
               Tasty Food
@@ -142,7 +138,6 @@ export default function Home() {
             </div>
           </div>
           
-          {/* دائیں جانب تصویر (مکمل دکھنے والی، بغیر زوم کے) */}
           <div className="flex justify-center relative w-full h-36 md:h-80">
             {slides.map((slide, index) => (
               <div key={index} className={`transition-opacity duration-700 absolute inset-0 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
@@ -153,7 +148,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-6 bg-stone-100">
+      <section className="py-6 bg-[#f7f5f2]"> {/* یہاں بھی کریم رنگ */}
         <div className="container mx-auto px-4 md:px-8">
           <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">Categories</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">

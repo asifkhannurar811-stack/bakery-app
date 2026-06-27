@@ -10,8 +10,8 @@ export default function ProductCard({ product }: { product: any }) {
     <>
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-stone-100 group">
         
-        {/* تصویر (object-contain استعمال کیا گیا ہے تاکہ زوم نہ ہو) */}
-        <div className="relative w-full h-36 md:h-48 bg-stone-50 overflow-hidden cursor-pointer p-2" onClick={() => setIsModalOpen(true)}>
+        {/* تصویر کے پیچھے کا رنگ بھی ہلکا کریم رکھا گیا ہے تاکہ میچ کرے */}
+        <div className="relative w-full h-36 md:h-48 bg-[#fcfcfb] overflow-hidden cursor-pointer p-2" onClick={() => setIsModalOpen(true)}>
           <img 
             src={product.imageUrl} 
             alt={product.name} 
@@ -51,7 +51,7 @@ export default function ProductCard({ product }: { product: any }) {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIsModalOpen(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="relative w-full h-64 bg-stone-50 p-4">
+            <div className="relative w-full h-64 bg-[#fcfcfb] p-4">
               <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
               <button onClick={() => setIsModalOpen(false)} className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600">✕</button>
             </div>
