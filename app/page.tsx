@@ -76,7 +76,7 @@ export default function Home() {
   });
 
   return (
-    <main className="bg-[#f7f5f2] min-h-screen"> {/* یہاں پروفیشنل کریم رنگ دیا گیا ہے */}
+    <main className="bg-[#f7f5f2] min-h-screen">
       <header className="bg-white shadow-sm py-4 px-4 md:px-8 flex justify-between items-center sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl">🍰</span>
@@ -93,9 +93,10 @@ export default function Home() {
             )}
           </Link>
 
+          {/* My Orders بٹن (اب موبائل پر بھی نظر آئے گا) */}
           {user && (
-            <Link href="/orders" className="p-2 md:bg-blue-50 md:text-blue-900 md:py-2 md:px-4 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold">
-              📦 <span className="hidden md:inline">Orders</span>
+            <Link href="/orders" className="p-2 md:bg-blue-50 md:text-blue-900 md:py-2 md:px-4 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold flex items-center gap-1">
+              <span>📦</span> <span className="hidden sm:inline">Orders</span>
             </Link>
           )}
 
@@ -148,10 +149,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-6 bg-[#f7f5f2]"> {/* یہاں بھی کریم رنگ */}
+      {/* کیٹگریز والا حصہ (اب یہ اوپر چپک جائے گا) */}
+      <section className="sticky top-[60px] z-40 bg-[#f7f5f2] py-4 border-b border-stone-200/50 shadow-sm">
         <div className="container mx-auto px-4 md:px-8">
-          <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">Categories</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map((cat) => (
               <button 
                 key={cat} 
@@ -165,7 +166,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 md:px-8 pb-12">
+      <section className="container mx-auto px-4 md:px-8 py-8">
         <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">
           {activeCategory === 'All' ? 'All Products' : activeCategory}
         </h2>

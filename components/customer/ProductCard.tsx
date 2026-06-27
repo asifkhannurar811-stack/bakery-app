@@ -10,7 +10,6 @@ export default function ProductCard({ product }: { product: any }) {
     <>
       <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-stone-100 group">
         
-        {/* تصویر کے پیچھے کا رنگ بھی ہلکا کریم رکھا گیا ہے تاکہ میچ کرے */}
         <div className="relative w-full h-36 md:h-48 bg-[#fcfcfb] overflow-hidden cursor-pointer p-2" onClick={() => setIsModalOpen(true)}>
           <img 
             src={product.imageUrl} 
@@ -41,7 +40,8 @@ export default function ProductCard({ product }: { product: any }) {
           <button 
             disabled={!product.isAvailable}
             onClick={() => addToCart(product)}
-            className="mt-3 w-full py-2 text-xs md:text-sm font-semibold text-white bg-stone-900 rounded-xl hover:bg-orange-600 transition disabled:bg-stone-300 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1"
+            // active:scale-95 سے بٹن دبنے پر تھوڑا چھوٹا ہو گا
+            className="mt-3 w-full py-2 text-xs md:text-sm font-semibold text-white bg-stone-900 rounded-xl hover:bg-orange-600 active:scale-95 active:bg-orange-700 transition-all disabled:bg-stone-300 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-1"
           >
             Add to Cart <span>+</span>
           </button>
@@ -63,7 +63,7 @@ export default function ProductCard({ product }: { product: any }) {
                 <span className="text-2xl font-extrabold text-stone-900">Rs {product.price}</span>
                 <button 
                   onClick={() => { addToCart(product); setIsModalOpen(false); }}
-                  className="py-3 px-8 font-semibold text-white bg-orange-600 rounded-xl hover:bg-orange-700 transition shadow-md cursor-pointer"
+                  className="py-3 px-8 font-semibold text-white bg-orange-600 rounded-xl hover:bg-orange-700 active:scale-95 transition-all shadow-md cursor-pointer"
                 >
                   Add to Cart
                 </button>
