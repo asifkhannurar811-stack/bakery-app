@@ -9,6 +9,9 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState<any[]>([]);
+  const [newOrderIds, setNewOrderIds] = useState<string[]>([]); // نیا آرڈر پکڑنے کے لیے
+  const [adminProducts, setAdminProducts] = useState<any[]>([]); // پروڈکٹس ڈیلیٹ کرنے کے لیے
+  
   const [productForm, setProductForm] = useState({ name: '', price: '', category: 'Bakery', description: '', imageUrl: '' });
   const [bulkJson, setBulkJson] = useState('');
   
@@ -27,10 +30,16 @@ export default function AdminDashboard() {
 
     fetchOrders();
     fetchSettings();
+    fetchAdminProducts();
 
     const channel = supabase
       .channel('admin-realtime-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchOrders())
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+        setOrders((prevOrders) => [payload.new, ...prevOrders]);
+        setNewOrderIds((prev) => [...prev, payload.new.id]); // نیا آرڈر آئی ڈی سیٹ کریں
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => fetchOrders())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => fetchAdminProducts())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -49,6 +58,11 @@ export default function AdminDashboard() {
     if (data) setOrders(data);
   };
 
+  const fetchAdminProducts = async () => {
+    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    if (data) setAdminProducts(data);
+  };
+
   const fetchSettings = async () => {
     const { data } = await supabase.from('settings').select('*').eq('id', 1).single();
     if (data) setSettingsForm(data);
@@ -56,8 +70,18 @@ export default function AdminDashboard() {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
+    setNewOrderIds((prev) => prev.filter(id => id !== orderId)); // سٹیٹس بدلنے پر نیا ٹیگ ہٹا دیں
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
     if (error) { alert('Error updating status: ' + error.message); fetchOrders(); }
+  };
+
+  // پروڈکٹ ڈیلیٹ کرنے کا فنکشن
+  const handleDeleteProduct = async (id: string) => {
+    if (confirm('Are you sure you want to delete this product?')) {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (!error) { alert('Product deleted successfully!'); fetchAdminProducts(); }
+      else { alert('Error: ' + error.message); }
+    }
   };
 
   const handleProductSubmit = async (e: React.FormEvent) => {
@@ -83,16 +107,11 @@ export default function AdminDashboard() {
     e.preventDefault();
     setLoadingSettings(true);
     const { error } = await supabase.from('settings').update({
-      hero_image_url: settingsForm.hero_image_url,
-      hero_offer_text: settingsForm.hero_offer_text,
-      hero_image_url_2: settingsForm.hero_image_url_2,
-      hero_offer_text_2: settingsForm.hero_offer_text_2,
-      hero_image_url_3: settingsForm.hero_image_url_3,
-      hero_offer_text_3: settingsForm.hero_offer_text_3,
-      jazzcash_number: settingsForm.jazzcash_number,
-      easypaisa_number: settingsForm.easypaisa_number,
-      delivery_start_time: settingsForm.delivery_start_time,
-      delivery_end_time: settingsForm.delivery_end_time
+      hero_image_url: settingsForm.hero_image_url, hero_offer_text: settingsForm.hero_offer_text,
+      hero_image_url_2: settingsForm.hero_image_url_2, hero_offer_text_2: settingsForm.hero_offer_text_2,
+      hero_image_url_3: settingsForm.hero_image_url_3, hero_offer_text_3: settingsForm.hero_offer_text_3,
+      jazzcash_number: settingsForm.jazzcash_number, easypaisa_number: settingsForm.easypaisa_number,
+      delivery_start_time: settingsForm.delivery_start_time, delivery_end_time: settingsForm.delivery_end_time
     }).eq('id', 1);
 
     if (!error) alert('Settings updated successfully!');
@@ -150,17 +169,21 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {orders.map((order: any) => (
-                    <tr key={order.id} className="border-b border-stone-100 hover:bg-stone-50 align-top">
-                      <td className="py-4 px-4 text-xs font-medium text-stone-800">{order.id.substring(0, 8)}</td>
+                    <tr key={order.id} className={`border-b border-stone-100 hover:bg-stone-50 align-top ${newOrderIds.includes(order.id) ? 'bg-green-50' : ''}`}>
+                      <td className="py-4 px-4 text-xs font-medium text-stone-800">
+                        {order.id.substring(0, 8)}
+                        {/* نیا آرڈر والا سبز بج */}
+                        {newOrderIds.includes(order.id) && (
+                          <span className="ml-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
+                        )}
+                      </td>
                       <td className="py-4 px-4">
                         <p className="text-sm font-medium text-stone-800">{order.customer_name}</p>
                         <p className="text-xs text-stone-500">{order.phone}</p>
                       </td>
                       <td className="py-4 px-4 text-sm text-stone-600">
                         <ul className="list-disc list-inside">
-                          {order.items?.map((item: any, index: number) => (
-                            <li key={index}>{item.quantity}x {item.name} <span className="text-stone-400">(Rs. {item.price})</span></li>
-                          ))}
+                          {order.items?.map((item: any, index: number) => (<li key={index}>{item.quantity}x {item.name} <span className="text-stone-400">(Rs. {item.price})</span></li>))}
                         </ul>
                         <p className="text-xs text-stone-400 mt-1">{order.address}</p>
                       </td>
@@ -191,23 +214,37 @@ export default function AdminDashboard() {
               <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div><label className="block text-sm font-medium text-stone-700 mb-1">Product Name</label><input type="text" required value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" placeholder="e.g. Chocolate Fudge Cake" /></div>
                 <div><label className="block text-sm font-medium text-stone-700 mb-1">Price (Rs.)</label><input type="number" required value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" placeholder="e.g. 1500" /></div>
-                <div><label className="block text-sm font-medium text-stone-700 mb-1">Category</label><select value={productForm.category} onChange={(e) => setProductForm({...productForm, category: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl bg-white cursor-pointer text-stone-900"><option>Bakery</option><option>Fast Food</option><option>Desserts & Snacks</option><option>Beverages</option><option>General Store</option></select></div>
+                <div><label className="block text-sm font-medium text-stone-700 mb-1">Category</label>
+                  <select value={productForm.category} onChange={(e) => setProductForm({...productForm, category: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl bg-white cursor-pointer text-stone-900">
+                    <option>Bakery</option><option>Fast Food</option><option>General Store</option><option>Toys</option><option>Cold Drink</option><option>Energy Drink</option>
+                  </select>
+                </div>
                 <div><label className="block text-sm font-medium text-stone-700 mb-1">Image URL</label><input type="url" required value={productForm.imageUrl} onChange={(e) => setProductForm({...productForm, imageUrl: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" placeholder="https://..." /></div>
                 <div className="md:col-span-2"><label className="block text-sm font-medium text-stone-700 mb-1">Description</label><textarea required rows={4} value={productForm.description} onChange={(e) => setProductForm({...productForm, description: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" placeholder="Describe the product..."></textarea></div>
                 <div className="md:col-span-2"><button type="submit" className="cursor-pointer bg-red-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-red-700">Save Product</button></div>
               </form>
             </div>
+
+            {/* موجودہ پروڈکٹس کی لسٹ اور ڈیلیٹ والا بٹن */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-              <h2 className="text-xl font-bold text-stone-800 mb-4">Bulk Add Products</h2>
-              <textarea rows={6} value={bulkJson} onChange={(e) => setBulkJson(e.target.value)} className="w-full p-3 border border-stone-300 rounded-xl font-mono text-sm text-stone-900 bg-white" placeholder='[ { "name": "Item 1", "price": 100, ... } ]'></textarea>
-              <button onClick={handleBulkAdd} className="cursor-pointer mt-4 bg-stone-800 text-white font-bold py-3 px-8 rounded-xl hover:bg-stone-900">Add Bulk Products</button>
+              <h2 className="text-xl font-bold text-stone-800 mb-4">Existing Products (Click to Delete)</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {adminProducts.map((p: any) => (
+                  <div key={p.id} className="border rounded-xl p-3 flex flex-col items-center text-center relative group">
+                    <button onClick={() => handleDeleteProduct(p.id)} className="absolute top-2 right-2 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-600 hover:text-white cursor-pointer text-xs opacity-0 group-hover:opacity-100 transition">✕</button>
+                    <img src={p.image_url} alt={p.name} className="w-full h-20 object-contain rounded-lg mb-2" />
+                    <h4 className="font-bold text-sm text-stone-800 line-clamp-1">{p.name}</h4>
+                    <p className="text-red-500 font-bold text-sm">Rs. {p.price}</p>
+                    <p className="text-stone-400 text-xs mt-1">{p.category}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ) : (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
             <h2 className="text-xl font-bold text-stone-800 mb-6">Website Settings</h2>
             <form onSubmit={handleSettingsSubmit} className="space-y-6">
-              
               <div className="border p-4 rounded-xl bg-blue-50">
                 <h3 className="font-bold text-blue-800 mb-3">Delivery Timings</h3>
                 <div className="grid grid-cols-2 gap-4">

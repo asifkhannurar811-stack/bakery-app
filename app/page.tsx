@@ -6,7 +6,8 @@ import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
 import Link from 'next/link';
 
-const categories = ['All', 'Bakery', 'Fast Food', 'Desserts', 'Beverages', 'Groceries'];
+// کیٹگریز کو مختصر اور چھوٹا کر دیا گیا ہے
+const categories = ['All', 'Bakery', 'Fast Food', 'General Store', 'Toys', 'Cold Drink', 'Energy Drink'];
 
 export default function Home() {
   const { user } = useAuth();
@@ -35,7 +36,6 @@ export default function Home() {
     }
     fetchSettings();
 
-    // اگر یوزر لاگ اِن نہیں ہے تو پاپ اپ دکھائیں
     if (!user) {
       const popupShown = sessionStorage.getItem('popupShown');
       if (!popupShown) {
@@ -83,7 +83,6 @@ export default function Home() {
 
   return (
     <main className="bg-[#f7f5f2] min-h-screen">
-      {/* ہیڈر */}
       <header className="bg-white shadow-sm py-3 px-4 md:px-8 sticky top-0 z-50 flex flex-col">
         <div className="flex justify-between items-center w-full">
           <Link href="/" className="flex items-center gap-2">
@@ -92,13 +91,11 @@ export default function Home() {
           </Link>
           
           <div className="flex items-center gap-2 md:gap-3">
-            {/* کارٹ بٹن (موبائل پر ٹیکسٹ کے ساتھ) */}
             <Link href="/cart" className="relative bg-orange-50 text-orange-900 py-2 px-3 rounded-full hover:bg-orange-100 cursor-pointer transition flex items-center gap-1 text-sm font-semibold">
               <span>🛒</span> <span>Cart</span>
               {cart.length > 0 && (<span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">{cart.length}</span>)}
             </Link>
 
-            {/* مائی آرڈرز بٹن (موبائل پر ٹیکسٹ کے ساتھ) */}
             {user && (
               <Link href="/orders" className="bg-blue-50 text-blue-900 py-2 px-3 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold flex items-center gap-1">
                 <span>📦</span> <span>Orders</span>
@@ -113,7 +110,6 @@ export default function Home() {
           </div>
         </div>
         
-        {/* ڈلیوری ٹائم والی لائن */}
         {settings.delivery_start_time && (
           <div className="text-center text-xs text-stone-500 mt-2 border-t pt-2">
             🛵 Delivery Available: <span className="font-bold text-stone-800">{settings.delivery_start_time}</span> to <span className="font-bold text-stone-800">{settings.delivery_end_time}</span>
@@ -147,11 +143,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="sticky top-[60px] z-40 bg-[#f7f5f2] py-4 border-b border-stone-200/50 shadow-sm">
+      {/* کیٹگریز والا حصہ (موبائل پر چھوٹا اور کمپیکٹ) */}
+      <section className="sticky top-[60px] z-40 bg-[#f7f5f2] py-3 border-b border-stone-200/50 shadow-sm">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-2 md:gap-3 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} className={`cursor-pointer whitespace-nowrap px-5 py-2.5 rounded-full font-medium shadow-sm transition text-sm ${activeCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-200'}`}>{cat}</button>
+              <button key={cat} onClick={() => setActiveCategory(cat)} className={`cursor-pointer whitespace-nowrap px-3 md:px-5 py-1.5 md:py-2.5 rounded-full font-medium shadow-sm transition text-xs md:text-sm ${activeCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-200'}`}>{cat}</button>
             ))}
           </div>
         </div>
@@ -172,7 +169,6 @@ export default function Home() {
         )}
       </section>
 
-      {/* سائن اپ پاپ اپ */}
       {showSignupPopup && (
         <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
