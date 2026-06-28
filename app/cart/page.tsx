@@ -11,9 +11,8 @@ export default function CartPage() {
   const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', address: '' });
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [transactionId, setTransactionId] = useState('');
+  const [locationLink, setLocationLink] = useState('');
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [locating, setLocating] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const router = useRouter();
 
@@ -24,27 +23,6 @@ export default function CartPage() {
     }
     fetchSettings();
   }, []);
-
-  const getLocation = () => {
-    setLocating(true);
-    if (navigator.geolocation) {
-      // enableHighAccuracy: true یہ فون کو مجبور کرے گا کہ وہ GPS استعمال کرے (واٹس ایپ کی طرح)
-      navigator.geolocation.getCurrentPosition(
-        (position) => { 
-          setLocation({ lat: position.coords.latitude, lng: position.coords.longitude }); 
-          setLocating(false); 
-          alert("Exact location captured successfully!"); 
-        },
-        (error) => { 
-          alert("Please allow location access and turn on GPS."); 
-          setLocating(false); 
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      alert("Geolocation is not supported by this browser.");
-    }
-  };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +37,7 @@ export default function CartPage() {
         items: cart,
         total_amount: totalAmount,
         status: 'Pending',
-        latitude: location?.lat,
-        longitude: location?.lng,
+        location_link: locationLink || null,
         payment_method: paymentMethod,
         transaction_id: transactionId || null
       }
@@ -120,7 +97,21 @@ export default function CartPage() {
               <div><label className="block text-sm font-medium text-stone-700 mb-1">Phone Number</label><input type="tel" required value={customerInfo.phone} onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" /></div>
               <div><label className="block text-sm font-medium text-stone-700 mb-1">Address</label><textarea required rows={3} value={customerInfo.address} onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})} className="w-full p-3 border border-stone-300 rounded-xl text-stone-900"></textarea></div>
 
-              <div><button type="button" onClick={getLocation} className={`w-full py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${location ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100'}`}>{locating ? "Fetching GPS..." : location ? "✓ Exact Location Captured" : "📍 Share Live Location (Like WhatsApp)"}</button></div>
+              {/* واٹس ایپ جیسا لوکیشن لِنک والا سسٹم */}
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Google Maps Location Link</label>
+                <input 
+                  type="url" 
+                  required 
+                  value={locationLink} 
+                  onChange={(e) => setLocationLink(e.target.value)} 
+                  className="w-full p-3 border border-stone-300 rounded-xl text-stone-900" 
+                  placeholder="Paste your location link here" 
+                />
+                <a href="https://www.google.com/maps" target="_blank" rel="noreferrer" className="text-xs text-blue-600 hover:underline mt-1 inline-block">
+                  📍 Click here to open Google Maps, select your location, copy the link and paste above.
+                </a>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-stone-700 mb-2">Select Payment Method</label>
