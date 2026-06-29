@@ -9,8 +9,8 @@ export default function AdminDashboard() {
 
   const [activeTab, setActiveTab] = useState('orders');
   const [orders, setOrders] = useState<any[]>([]);
-  const [newOrderIds, setNewOrderIds] = useState<string[]>([]); // نیا آرڈر پکڑنے کے لیے
-  const [adminProducts, setAdminProducts] = useState<any[]>([]); // پروڈکٹس ڈیلیٹ کرنے کے لیے
+  const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
+  const [adminProducts, setAdminProducts] = useState<any[]>([]);
   
   const [productForm, setProductForm] = useState({ name: '', price: '', category: 'Bakery', description: '', imageUrl: '' });
   const [bulkJson, setBulkJson] = useState('');
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
       .channel('admin-realtime-channel')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
         setOrders((prevOrders) => [payload.new, ...prevOrders]);
-        setNewOrderIds((prev) => [...prev, payload.new.id]); // نیا آرڈر آئی ڈی سیٹ کریں
+        setNewOrderIds((prev) => [...prev, payload.new.id]);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, () => fetchOrders())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => fetchAdminProducts())
@@ -59,7 +59,8 @@ export default function AdminDashboard() {
   };
 
   const fetchAdminProducts = async () => {
-    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    // یہاں سے order('created_at') ہٹا دیا گیا ہے تاکہ پروڈکٹس دیکھائی دیں
+    const { data } = await supabase.from('products').select('*');
     if (data) setAdminProducts(data);
   };
 
@@ -70,12 +71,11 @@ export default function AdminDashboard() {
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setOrders((prev) => prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o));
-    setNewOrderIds((prev) => prev.filter(id => id !== orderId)); // سٹیٹس بدلنے پر نیا ٹیگ ہٹا دیں
+    setNewOrderIds((prev) => prev.filter(id => id !== orderId));
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
     if (error) { alert('Error updating status: ' + error.message); fetchOrders(); }
   };
 
-  // پروڈکٹ ڈیلیٹ کرنے کا فنکشن
   const handleDeleteProduct = async (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
       const { error } = await supabase.from('products').delete().eq('id', id);
@@ -172,7 +172,6 @@ export default function AdminDashboard() {
                     <tr key={order.id} className={`border-b border-stone-100 hover:bg-stone-50 align-top ${newOrderIds.includes(order.id) ? 'bg-green-50' : ''}`}>
                       <td className="py-4 px-4 text-xs font-medium text-stone-800">
                         {order.id.substring(0, 8)}
-                        {/* نیا آرڈر والا سبز بج */}
                         {newOrderIds.includes(order.id) && (
                           <span className="ml-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">NEW</span>
                         )}
@@ -227,11 +226,16 @@ export default function AdminDashboard() {
 
             {/* موجودہ پروڈکٹس کی لسٹ اور ڈیلیٹ والا بٹن */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-              <h2 className="text-xl font-bold text-stone-800 mb-4">Existing Products (Click to Delete)</h2>
+              <h2 className="text-xl font-bold text-stone-800 mb-4">Existing Products</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {adminProducts.map((p: any) => (
-                  <div key={p.id} className="border rounded-xl p-3 flex flex-col items-center text-center relative group">
-                    <button onClick={() => handleDeleteProduct(p.id)} className="absolute top-2 right-2 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-600 hover:text-white cursor-pointer text-xs opacity-0 group-hover:opacity-100 transition">✕</button>
+                  <div key={p.id} className="border rounded-xl p-3 flex flex-col items-center text-center relative">
+                    <button 
+                      onClick={() => handleDeleteProduct(p.id)} 
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-700 cursor-pointer text-xs shadow-md"
+                    >
+                      🗑️
+                    </button>
                     <img src={p.image_url} alt={p.name} className="w-full h-20 object-contain rounded-lg mb-2" />
                     <h4 className="font-bold text-sm text-stone-800 line-clamp-1">{p.name}</h4>
                     <p className="text-red-500 font-bold text-sm">Rs. {p.price}</p>
