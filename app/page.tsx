@@ -6,12 +6,11 @@ import { useAuth } from './context/AuthContext';
 import { useCart } from './context/CartContext';
 import Link from 'next/link';
 
-// کیٹگریز کو مختصر اور چھوٹا کر دیا گیا ہے
 const categories = ['All', 'Bakery', 'Fast Food', 'General Store', 'Toys', 'Cold Drink', 'Energy Drink'];
 
 export default function Home() {
   const { user } = useAuth();
-  const { cart } = useCart();
+  const { cart, totalAmount } = useCart();
   const [products, setProducts] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,11 +35,15 @@ export default function Home() {
     }
     fetchSettings();
 
+    // پاپ اپ کو localStorage میں سیو کریں گے تاکہ بار بار نہ آئے
     if (!user) {
-      const popupShown = sessionStorage.getItem('popupShown');
-      if (!popupShown) {
-        setShowSignupPopup(true);
-        sessionStorage.setItem('popupShown', 'true');
+      const popupSeen = localStorage.getItem('hasSeenSignupPopup');
+      if (!popupSeen) {
+        const timer = setTimeout(() => {
+          setShowSignupPopup(true);
+          localStorage.setItem('hasSeenSignupPopup', 'true');
+        }, 4000); // 4 سیکنڈ بعد آئے گا
+        return () => clearTimeout(timer);
       }
     }
 
@@ -82,96 +85,142 @@ export default function Home() {
   });
 
   return (
-    <main className="bg-[#f7f5f2] min-h-screen">
-      <header className="bg-white shadow-sm py-3 px-4 md:px-8 sticky top-0 z-50 flex flex-col">
-        <div className="flex justify-between items-center w-full">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">🍰</span>
-            <h1 className="text-xl md:text-2xl font-extrabold text-orange-600">Fooma</h1>
-          </Link>
-          
-          <div className="flex items-center gap-2 md:gap-3">
-            <Link href="/cart" className="relative bg-orange-50 text-orange-900 py-2 px-3 rounded-full hover:bg-orange-100 cursor-pointer transition flex items-center gap-1 text-sm font-semibold">
-              <span>🛒</span> <span>Cart</span>
-              {cart.length > 0 && (<span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">{cart.length}</span>)}
+    <main className="bg-[#f7f5f2] min-h-screen flex flex-col">
+      <div className="flex-grow">
+        <header className="bg-white shadow-sm sticky top-0 z-50 flex flex-col">
+          <div className="py-3 px-4 md:px-8 flex justify-between items-center w-full">
+            <Link href="/" className="flex items-center gap-2">
+              <span className="text-2xl">🍰</span>
+              <h1 className="text-xl md:text-2xl font-extrabold text-orange-600">Fooma</h1>
             </Link>
-
-            {user && (
-              <Link href="/orders" className="bg-blue-50 text-blue-900 py-2 px-3 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold flex items-center gap-1">
-                <span>📦</span> <span>Orders</span>
+            
+            <div className="flex items-center gap-2 md:gap-3">
+              <Link href="/cart" className="relative bg-orange-50 text-orange-900 py-2 px-3 rounded-full hover:bg-orange-100 cursor-pointer transition flex items-center gap-1 text-sm font-semibold">
+                <span>🛒</span> <span>Cart</span>
+                {cart.length > 0 && (<span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">{cart.length}</span>)}
               </Link>
-            )}
 
-            {user ? (
-              <button onClick={() => supabase.auth.signOut()} className="bg-stone-800 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-stone-900 cursor-pointer transition text-xs md:text-sm">Logout</button>
-            ) : (
-              <Link href="/auth" className="bg-red-600 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-700 cursor-pointer transition text-xs md:text-sm">Login</Link>
-            )}
-          </div>
-        </div>
-        
-        {settings.delivery_start_time && (
-          <div className="text-center text-xs text-stone-500 mt-2 border-t pt-2">
-            🛵 Delivery Available: <span className="font-bold text-stone-800">{settings.delivery_start_time}</span> to <span className="font-bold text-stone-800">{settings.delivery_end_time}</span>
-          </div>
-        )}
-      </header>
+              {user && (
+                <Link href="/orders" className="bg-blue-50 text-blue-900 py-2 px-3 rounded-full hover:bg-blue-100 cursor-pointer transition text-sm font-semibold flex items-center gap-1">
+                  <span>📦</span> <span>Orders</span>
+                </Link>
+              )}
 
-      <section className="bg-white py-6 md:py-12 overflow-hidden">
-        <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 gap-4 items-center">
-          <div className="text-left z-10">
-            <span className="inline-block bg-orange-100 text-orange-700 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full mb-2 uppercase tracking-wide">Tasty Food</span>
-            <div className="h-[50px] md:h-[80px] overflow-hidden relative">
+              {user ? (
+                <button onClick={() => supabase.auth.signOut()} className="bg-stone-800 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-stone-900 cursor-pointer transition text-xs md:text-sm">Logout</button>
+              ) : (
+                <Link href="/auth" className="bg-red-600 text-white font-semibold py-2 px-4 md:px-6 rounded-full hover:bg-red-700 cursor-pointer transition text-xs md:text-sm">Login</Link>
+              )}
+            </div>
+          </div>
+          
+          {/* پروفیشنل ڈلیوری ٹائم بینر */}
+          {settings.delivery_start_time && (
+            <div className="bg-amber-100 text-amber-900 text-center text-xs py-1.5 font-medium border-b border-amber-200">
+              🛵 Delivery Available: <span className="font-bold">{settings.delivery_start_time}</span> to <span className="font-bold">{settings.delivery_end_time}</span>
+            </div>
+          )}
+        </header>
+
+        <section className="bg-white py-6 md:py-12 overflow-hidden">
+          <div className="container mx-auto px-4 md:px-8 grid grid-cols-2 gap-4 items-center">
+            <div className="text-left z-10">
+              <span className="inline-block bg-orange-100 text-orange-700 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full mb-2 uppercase tracking-wide">Tasty Food</span>
+              <div className="h-[50px] md:h-[80px] overflow-hidden relative">
+                {slides.map((slide, index) => (
+                  <h1 key={index} className={`text-xl md:text-4xl font-extrabold text-stone-900 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>{slide.offer}</h1>
+                ))}
+              </div>
+              <p className="hidden md:block text-stone-500 mb-4 text-sm">Freshly baked goods delivered fast.</p>
+              <div className="relative mt-2 md:mt-4">
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full py-2 md:py-3 px-3 md:px-5 pr-10 md:pr-14 rounded-full text-stone-800 border border-stone-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs md:text-sm" />
+                <button className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-1.5 md:p-2.5 rounded-full text-white cursor-pointer hover:bg-orange-600 transition text-xs">🔍</button>
+              </div>
+            </div>
+            
+            <div className="flex justify-center relative w-full h-36 md:h-80">
               {slides.map((slide, index) => (
-                <h1 key={index} className={`text-xl md:text-4xl font-extrabold text-stone-900 transition-all duration-500 ${index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 absolute top-0 left-0 right-0'}`}>{slide.offer}</h1>
+                <div key={index} className={`transition-opacity duration-700 absolute inset-0 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
+                  <img src={slide.img} alt="Food Offer" className="w-full h-full object-contain rounded-2xl md:rounded-3xl" />
+                </div>
               ))}
             </div>
-            <p className="hidden md:block text-stone-500 mb-4 text-sm">Freshly baked goods delivered fast.</p>
-            <div className="relative mt-2 md:mt-4">
-              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="w-full py-2 md:py-3 px-3 md:px-5 pr-10 md:pr-14 rounded-full text-stone-800 border border-stone-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-xs md:text-sm" />
-              <button className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 bg-orange-500 p-1.5 md:p-2.5 rounded-full text-white cursor-pointer hover:bg-orange-600 transition text-xs">🔍</button>
+          </div>
+        </section>
+
+        <section className="sticky top-[56px] z-40 bg-[#f7f5f2] py-3 border-b border-stone-200/50 shadow-sm">
+          <div className="container mx-auto px-4 md:px-8">
+            <div className="flex gap-2 md:gap-3 overflow-x-auto pb-1 scrollbar-hide">
+              {categories.map((cat) => (
+                <button key={cat} onClick={() => setActiveCategory(cat)} className={`cursor-pointer whitespace-nowrap px-3 md:px-5 py-1.5 md:py-2.5 rounded-full font-medium shadow-sm transition text-xs md:text-sm ${activeCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-200'}`}>{cat}</button>
+              ))}
             </div>
           </div>
-          
-          <div className="flex justify-center relative w-full h-36 md:h-80">
-            {slides.map((slide, index) => (
-              <div key={index} className={`transition-opacity duration-700 absolute inset-0 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}>
-                <img src={slide.img} alt="Food Offer" className="w-full h-full object-contain rounded-2xl md:rounded-3xl" />
-              </div>
-            ))}
+        </section>
+
+        <section className="container mx-auto px-4 md:px-8 py-8 pb-24 md:pb-8">
+          <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">{activeCategory === 'All' ? 'All Products' : activeCategory}</h2>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[1,2,3,4,5,6].map(i => (<div key={i} className="bg-white rounded-2xl h-64 animate-pulse"></div>))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product: any) => (<ProductCard key={product.id} product={{ _id: product.id, name: product.name, description: product.description, price: product.price, category: product.category, imageUrl: product.image_url, isAvailable: product.is_available }} />))
+              ) : (<p className="text-stone-500 text-center py-8 col-span-full">No products found.</p>)}
+            </div>
+          )}
+        </section>
+      </div>
+
+      {/* فٹر (Footer) - پروفیشنل ویب سائٹس کی طرح */}
+      <footer className="bg-stone-900 text-white pt-10 pb-24 md:pb-10 mt-auto">
+        <div className="container mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h3 className="text-xl font-extrabold text-orange-500 mb-3">Fooma Bakery</h3>
+            <p className="text-sm text-stone-400">Delivering freshly baked goods, savory snacks, and daily groceries right to your doorstep.</p>
+          </div>
+          <div>
+            <h4 className="font-bold mb-3 text-stone-200">Quick Links</h4>
+            <ul className="space-y-2 text-sm text-stone-400">
+              <li><Link href="/" className="hover:text-orange-500 cursor-pointer">Home</Link></li>
+              <li><Link href="/cart" className="hover:text-orange-500 cursor-pointer">Cart</Link></li>
+              {user && <li><Link href="/orders" className="hover:text-orange-500 cursor-pointer">My Orders</Link></li>}
+              {!user && <li><Link href="/auth" className="hover:text-orange-500 cursor-pointer">Login / Sign Up</Link></li>}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold mb-3 text-stone-200">Contact Us</h4>
+            <p className="text-sm text-stone-400">📍 Address: Main Bazaar, City</p>
+            <p className="text-sm text-stone-400">📞 Phone: 0300-1234567</p>
+            {settings.delivery_start_time && (
+              <p className="text-sm text-stone-400">🕒 Delivery: {settings.delivery_start_time} - {settings.delivery_end_time}</p>
+            )}
           </div>
         </div>
-      </section>
-
-      {/* کیٹگریز والا حصہ (موبائل پر چھوٹا اور کمپیکٹ) */}
-      <section className="sticky top-[60px] z-40 bg-[#f7f5f2] py-3 border-b border-stone-200/50 shadow-sm">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="flex gap-2 md:gap-3 overflow-x-auto pb-1 scrollbar-hide">
-            {categories.map((cat) => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} className={`cursor-pointer whitespace-nowrap px-3 md:px-5 py-1.5 md:py-2.5 rounded-full font-medium shadow-sm transition text-xs md:text-sm ${activeCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-200'}`}>{cat}</button>
-            ))}
-          </div>
+        <div className="border-t border-stone-800 mt-8 pt-6 text-center text-xs text-stone-500">
+          © {new Date().getFullYear()} Fooma Bakery. All rights reserved.
         </div>
-      </section>
+      </footer>
 
-      <section className="container mx-auto px-4 md:px-8 py-8">
-        <h2 className="text-lg md:text-xl font-bold text-stone-800 mb-4">{activeCategory === 'All' ? 'All Products' : activeCategory}</h2>
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {[1,2,3,4,5,6].map(i => (<div key={i} className="bg-white rounded-2xl h-64 animate-pulse"></div>))}
+      {/* موبائل کے لیے فلوٹنگ کارٹ بار (Sticky Cart) */}
+      {cart.length > 0 && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-2xl border-t border-stone-200 p-3 z-50 flex justify-between items-center rounded-t-2xl">
+          <div>
+            <p className="text-xs text-stone-500">{cart.length} item(s) in cart</p>
+            <p className="text-lg font-extrabold text-stone-900">Rs. {totalAmount}</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product: any) => (<ProductCard key={product.id} product={{ _id: product.id, name: product.name, description: product.description, price: product.price, category: product.category, imageUrl: product.image_url, isAvailable: product.is_available }} />))
-            ) : (<p className="text-stone-500 text-center py-8 col-span-full">No products found.</p>)}
-          </div>
-        )}
-      </section>
+          <Link href="/cart" className="bg-red-600 text-white font-bold py-3 px-8 rounded-full cursor-pointer flex items-center gap-2">
+            View Cart 🛒
+          </Link>
+        </div>
+      )}
 
+      {/* سائن اپ پاپ اپ */}
       {showSignupPopup && (
-        <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center">
+        <div className="fixed inset-0 z-[100] bg-black/70 flex items-center justify-center p-4" onClick={() => setShowSignupPopup(false)}>
+          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-2xl font-bold text-stone-800 mb-2">Welcome to Fooma! 🍰</h3>
             <p className="text-stone-500 text-sm mb-6">Sign up with your email to get fresh bakery items delivered to your doorstep.</p>
             <div className="flex flex-col gap-3">

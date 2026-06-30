@@ -8,7 +8,8 @@ export default function ProductCard({ product }: { product: any }) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col border border-stone-100 group">
+      {/* کارڈ پر hover:-translate-y-1 سے یہ اوپر اٹھنے لگے گا */}
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col border border-stone-100 group">
         
         <div className="relative w-full h-36 md:h-48 bg-[#fcfcfb] overflow-hidden cursor-pointer p-2" onClick={() => setIsModalOpen(true)}>
           <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" loading="lazy" />
@@ -33,15 +34,12 @@ export default function ProductCard({ product }: { product: any }) {
         </div>
       </div>
 
-      {/* ماڈل (پاپ اپ) میں بیک بٹن کا اضافہ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setIsModalOpen(false)}>
           <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="relative w-full h-64 bg-[#fcfcfb] p-4">
               <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain" />
-              <button onClick={() => setIsModalOpen(false)} className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600 flex items-center gap-1 text-xs font-semibold">
-                ← Back
-              </button>
+              <button onClick={() => setIsModalOpen(false)} className="absolute top-3 left-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600 flex items-center gap-1 text-xs font-semibold">← Back</button>
               <button onClick={() => setIsModalOpen(false)} className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md cursor-pointer text-stone-600 hover:text-red-600">✕</button>
             </div>
             <div className="p-6">
