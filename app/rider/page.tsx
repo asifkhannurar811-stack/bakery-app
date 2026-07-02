@@ -5,24 +5,38 @@ import { supabase } from '@/lib/supabase';
 export default function RiderPanel() {
   const [isRider, setIsRider] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
-  const RIDER_PASSWORD = 'rider123'; // رائیڈر کا پاس ورڈ (آپ اسے بدل سکتے ہیں)
+  const RIDER_PASSWORD = 'rider123'; // رائیڈر کا پاس ورڈ
 
   const [orders, setOrders] = useState<any[]>([]);
 
+  // پہلا useEffect: صرف لاگ اِن چیک کرنے کے لیے
   useEffect(() => {
     const auth = sessionStorage.getItem('isRiderAuth');
     if (auth === 'true') setIsRider(true);
+  }, []);
 
+  // دوسرا useEffect: جب رائیڈر لاگ اِن ہو جائے تو لائیو اپ ڈیٹس آن کریں
+  useEffect(() => {
     if (isRider) {
       fetchRiderOrders();
 
-      // لائیو اپ ڈیٹس: جب ایڈمن نیا آرڈر بھیجے تو فوراً رائیڈر کو دکھے
+      // لائیو اپ ڈیٹس: جب نیا آرڈر آئے یا پرانا اپ ڈیٹ ہو
       const channel = supabase
-        .channel('rider-realtime-channel')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => fetchRiderOrders())
+        .channel('rider-orders-realtime')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
+          // نیا آرڈر آئے تو فوراً لسٹ میں شامل کر دو
+          setOrders((prev) => [payload.new, ...prev]);
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
+          // اگر ایڈمن سٹیٹس بدلے یا رائیڈر ڈلیوری مکمل کرے
+          setOrders((prev) => prev.map((o) => o.id === payload.new.id ? payload.new : o));
+          // اگر آرڈر ڈلیور ہو جائے تو وہ لسٹ سے ہٹ جائے گا کیونکہ ہم نیچے صرف Pending/Out for Delivery دیکھتے ہیں
+        })
         .subscribe();
 
-      return () => { supabase.removeChannel(channel); };
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [isRider]);
 
@@ -37,7 +51,7 @@ export default function RiderPanel() {
   };
 
   const fetchRiderOrders = async () => {
-    // صرف وہ آرڈرز لائیں جو ڈلیوری کے لیے ہیں
+    // صرف وہ آرڈرز لائیں جو ابھی ڈلیوری کے لیے باقی ہیں
     const { data } = await supabase
       .from('orders')
       .select('*')
@@ -92,7 +106,7 @@ export default function RiderPanel() {
         {orders.length === 0 ? (
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-200 text-center">
             <p className="text-stone-500 text-lg">No deliveries assigned yet.</p>
-            <p className="text-stone-400 text-sm mt-2">Waiting for admin to assign orders...</p>
+            <p className="text-stone-400 text-sm mt-2">Waiting for new orders...</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -130,7 +144,7 @@ export default function RiderPanel() {
                   {/* گوگل میپ پر نیویگیٹ کرنے کا بٹن */}
                   {order.location_link ? (
                     <a href={order.location_link} target="_blank" rel="noreferrer" className="bg-blue-600 text-white text-center font-bold py-3 rounded-xl hover:bg-blue-700 transition cursor-pointer flex items-center justify-center gap-2">
-                      📍 Navigate
+                      📍 Navigate Map
                     </a>
                   ) : (
                     <button disabled className="bg-stone-300 text-stone-500 text-center font-bold py-3 rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
@@ -163,4 +177,4 @@ export default function RiderPanel() {
       </div>
     </div>
   );
-}
+}ø
